@@ -1,27 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Price Visualization</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Data</title>
+  <style>
+    #apiUrl {
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to Stock Price Visualization</h1>
-    </header>
+  <h1>Stock Data</h1>
+  <label for="apiUrl">API URL:</label>
+  <input type="text" id="apiUrl" value="https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo">
+  <button onclick="updateData()">Update Data</button>
+  <br><br>
+  <textarea id="responseTextArea" rows="20" cols="80" readonly></textarea>
+  <script>
+    'use strict';
+    var apiUrlInput = document.getElementById('apiUrl');
+    var responseTextArea = document.getElementById('responseTextArea');
 
-    <main>
-        <div id="latest-price-container">
-            <h2>Latest Stock Price xxXXX</h2>
-            <p id="latest-price">Fetching data...</p>
-        </div>
-    </main>
+    function updateData() {
+      var apiUrl = apiUrlInput.value;
+      var request = new XMLHttpRequest();
+      request.open('GET', apiUrl, true);
+      request.setRequestHeader('Content-Type', 'application/json');
+      request.setRequestHeader('User-Agent', 'XMLHttpRequest');
 
-    <footer>
-        <p>&copy; 2024 Stock Price Visualization. All rights reserved.</p>
-    </footer>
+      request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+          // Success!
+          var data = JSON.parse(request.responseText);
+          responseTextArea.value = JSON.stringify(data, null, 2);
+        } else {
+          // We reached our target server, but it returned an error
+          console.error('Error:', request.status);
+        }
+      };
 
-    <script src="script.js"></script>
+      request.onerror = function() {
+        // There was a connection error of some sort
+        console.error('Connection Error');
+      };
+
+      request.send();
+    }
+
+    // Initial data fetch on page load
+    updateData();
+  </script>
 </body>
 </html>
