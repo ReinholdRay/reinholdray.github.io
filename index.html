@@ -14,6 +14,14 @@
         #apiUrl {
             width: 100%;
         }
+        #calculationTable {
+            margin-left: 20px;
+            float: right;
+        }
+        #calculationTable td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
@@ -30,7 +38,32 @@
         <option value="4. close" selected>Close</option>
     </select>
     <br><br>
-    <textarea id="responseTextArea" rows="20" cols="80" readonly></textarea>
+    <textarea id="responseTextArea" rows="20" cols="60" readonly></textarea>
+
+    <div id="calculationTable">
+        <table>
+            <tr>
+                <td>Variable</td>
+                <td>Value</td>
+            </tr>
+            <tr>
+                <td>Trailing Stop</td>
+                <td id="differenceWithLatestClose">-</td>
+            </tr>
+            <tr>
+                <td>Trailing Stop (%)</td>
+                <td id="differenceWithLatestClosePercent">-</td>
+            </tr>
+            <tr>
+                <td>Highest Value</td>
+                <td id="highestValue">-</td>
+            </tr>
+            <tr>
+                <td>Most Recent Close</td>
+                <td id="mostRecentClose">-</td>
+            </tr>
+        </table>
+    </div>
 
     <div style="width: 800px; margin: 20px auto;">
         <canvas id="myChart"></canvas>
@@ -42,6 +75,10 @@
         var responseTextArea = document.getElementById('responseTextArea');
         var priceTypeSelect = document.getElementById('priceType');
         var myChart;
+        var differenceWithLatestCloseElement = document.getElementById('differenceWithLatestClose');
+        var differenceWithLatestClosePercentElement = document.getElementById('differenceWithLatestClosePercent');
+        var highestValueElement = document.getElementById('highestValue');
+        var mostRecentCloseElement = document.getElementById('mostRecentClose');
 
         function updateData() {
             var apiUrl = apiUrlInput.value;
@@ -125,6 +162,17 @@
                             }
                         });
                     }
+
+                    // Calculate difference with most recent close
+                    var mostRecentDate = dates[dates.length - 1];
+                    var mostRecentClose = parseFloat(dailyPrices[mostRecentDate]["4. close"]);
+                    var highestValue = Math.max(...prices);
+                    var difference = highestValue - mostRecentClose;
+                    var differencePercent = (difference / highestValue) * 100;
+                    differenceWithLatestCloseElement.textContent = difference.toFixed(2);
+                    differenceWithLatestClosePercentElement.textContent = differencePercent.toFixed(2);
+                    highestValueElement.textContent = highestValue.toFixed(2);
+                    mostRecentCloseElement.textContent = mostRecentClose.toFixed(2);
                 } else {
                     // We reached our target server, but it returned an error
                     console.error('Error:', request.status);
