@@ -33,9 +33,9 @@
     <label for="priceType">Select Price Type:</label>
     <select id="priceType" onchange="updateData()">
         <option value="1. open">Open</option>
-        <option value="2. high">High</option>
+        <option value="2. high" selected>High</option>
         <option value="3. low">Low</option>
-        <option value="4. close" selected>Close</option>
+        <option value="4. close">Close</option>
     </select>
     <br><br>
     <textarea id="responseTextArea" rows="20" cols="60" readonly></textarea>
@@ -45,22 +45,27 @@
             <tr>
                 <td>Variable</td>
                 <td>Value</td>
+                <td>Unit</td> <!-- New column for unit -->
             </tr>
             <tr>
-                <td>Trailing Stop</td>
+                <td>Trailing Stop Value</td>
                 <td id="differenceWithLatestClose">-</td>
+                <td>$</td> <!-- Assuming the unit is Dollar -->
             </tr>
             <tr>
-                <td>Trailing Stop (%)</td>
+                <td>Trailing Stop Percent</td>
                 <td id="differenceWithLatestClosePercent">-</td>
+                <td>%</td> <!-- Assuming the unit is Percent -->
             </tr>
             <tr>
                 <td>Highest Value</td>
                 <td id="highestValue">-</td>
+                <td>$</td> <!-- Assuming the unit is Dollar -->
             </tr>
             <tr>
                 <td>Most Recent Close</td>
                 <td id="mostRecentClose">-</td>
+                <td>$</td> <!-- Assuming the unit is Dollar -->
             </tr>
         </table>
     </div>
