@@ -1,55 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stock Data</title>
-  <style>
-    #apiUrl {
-      width: 100%;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Data and Price Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+        #apiUrl {
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-  <h1>Stock Data</h1>
-  <label for="apiUrl">API URL:</label>
-  <input type="text" id="apiUrl" value="https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo">
-  <button onclick="updateData()">Update Data</button>
-  <br><br>
-  <textarea id="responseTextArea" rows="20" cols="80" readonly></textarea>
-  <script>
-    'use strict';
-    var apiUrlInput = document.getElementById('apiUrl');
-    var responseTextArea = document.getElementById('responseTextArea');
+    <h1>Stock Data</h1>
+    <label for="apiUrl">API URL:</label>
+    <input type="text" id="apiUrl" value="https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo">
+    <button onclick="updateData()">Update Data</button>
+    <br><br>
+    <textarea id="responseTextArea" rows="20" cols="80" readonly></textarea>
 
-    function updateData() {
-      var apiUrl = apiUrlInput.value;
-      var request = new XMLHttpRequest();
-      request.open('GET', apiUrl, true);
-      request.setRequestHeader('Content-Type', 'application/json');
-      request.setRequestHeader('User-Agent', 'XMLHttpRequest');
+    <div style="width: 800px; margin: 20px auto;">
+        <canvas id="myChart"></canvas>
+    </div>
 
-      request.onload = function() {
-        if (request.status >= 200 && request.status < 400) {
-          // Success!
-          var data = JSON.parse(request.responseText);
-          responseTextArea.value = JSON.stringify(data, null, 2);
-        } else {
-          // We reached our target server, but it returned an error
-          console.error('Error:', request.status);
+    <script>
+        'use strict';
+        var apiUrlInput = document.getElementById('apiUrl');
+        var responseTextArea = document.getElementById('responseTextArea');
+
+        function updateData() {
+            var apiUrl = apiUrlInput.value;
+            var request = new XMLHttpRequest();
+            request.open('GET', apiUrl, true);
+            request.setRequestHeader('Content-Type', 'application/json');
+            request.setRequestHeader('User-Agent', 'XMLHttpRequest');
+
+            request.onload = function() {
+                if (request.status >= 200 && request.status < 400) {
+                    // Success!
+                    var data = JSON.parse(request.responseText);
+                    responseTextArea.value = JSON.stringify(data, null, 2);
+
+                    // Update chart with new data
+                    const dailyPrices = data['Time Series (Daily)'];
+                    const dates = Object.keys(dailyPrices).reverse();
+                    const closingPrices = dates.map(date => parseFloat(dailyPrices[date]['4. close']));
+                    const labels = dates.map(date => new Date(date).toLocaleDateString('en-US'));
+
+                    const ctx = document.getElementById('myChart').getContext('2d');
+                    const myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'IBM Closing Prices',
+                                data: closingPrices,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                },
+                                y: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Closing Price'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    // We reached our target server, but it returned an error
+                    console.error('Error:', request.status);
+                }
+            };
+
+            request.onerror = function() {
+                // There was a connection error of some sort
+                console.error('Connection Error');
+            };
+
+            request.send();
         }
-      };
 
-      request.onerror = function() {
-        // There was a connection error of some sort
-        console.error('Connection Error');
-      };
-
-      request.send();
-    }
-
-    // Initial data fetch on page load
-    updateData();
-  </script>
+        // Initial data fetch on page load
+        updateData();
+    </script>
 </body>
 </html>
