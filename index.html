@@ -32,6 +32,7 @@
         'use strict';
         var apiUrlInput = document.getElementById('apiUrl');
         var responseTextArea = document.getElementById('responseTextArea');
+        var myChart;
 
         function updateData() {
             var apiUrl = apiUrlInput.value;
@@ -52,38 +53,44 @@
                     const closingPrices = dates.map(date => parseFloat(dailyPrices[date]['4. close']));
                     const labels = dates.map(date => new Date(date).toLocaleDateString('en-US'));
 
-                    const ctx = document.getElementById('myChart').getContext('2d');
-                    const myChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'IBM Closing Prices',
-                                data: closingPrices,
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                x: {
-                                    display: true,
-                                    title: {
+                    if (myChart) {
+                        myChart.data.labels = labels;
+                        myChart.data.datasets[0].data = closingPrices;
+                        myChart.update();
+                    } else {
+                        const ctx = document.getElementById('myChart').getContext('2d');
+                        myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'IBM Closing Prices',
+                                    data: closingPrices,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    x: {
                                         display: true,
-                                        text: 'Date'
-                                    }
-                                },
-                                y: {
-                                    display: true,
-                                    title: {
+                                        title: {
+                                            display: true,
+                                            text: 'Date'
+                                        }
+                                    },
+                                    y: {
                                         display: true,
-                                        text: 'Closing Price'
+                                        title: {
+                                            display: true,
+                                            text: 'Closing Price'
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
                 } else {
                     // We reached our target server, but it returned an error
                     console.error('Error:', request.status);
