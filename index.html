@@ -57,19 +57,36 @@
                     var data = JSON.parse(request.responseText);
                     responseTextArea.value = JSON.stringify(data, null, 2);
 
-                    // Update chart with new data
-                    const dailyPrices = data['Time Series (Daily)'];
-                    const dates = Object.keys(dailyPrices).reverse();
-                    const prices = dates.map(date => parseFloat(dailyPrices[date][priceType]));
-                    const labels = dates.map(date => new Date(date).toLocaleDateString('en-US'));
+                    // Extracting data based on response structure
+                    var timeSeriesKey;
+                    if (data['Time Series (Daily)']) {
+                        timeSeriesKey = 'Time Series (Daily)';
+                    } else if (data['Time Series (5min)']) {
+                        timeSeriesKey = 'Time Series (5min)';
+                    } else {
+                        console.error('Unable to find Time Series data in the response');
+                        return;
+                    }
 
+                    var dailyPrices = data[timeSeriesKey];
+                    var dates = Object.keys(dailyPrices).reverse();
+                    var prices = dates.map(date => parseFloat(dailyPrices[date][priceType]));
+                    var labels = dates.map(date => {
+                        if (timeSeriesKey === 'Time Series (Daily)') {
+                            return new Date(date).toLocaleDateString('en-US');
+                        } else {
+                            return new Date(date).toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+                        }
+                    });
+
+                    // Update chart with new data
                     if (myChart) {
                         myChart.data.labels = labels;
                         myChart.data.datasets[0].data = prices;
                         myChart.options.plugins.title.text = `${priceType.split(' ')[1].toUpperCase()} Prices`;
                         myChart.update();
                     } else {
-                        const ctx = document.getElementById('myChart').getContext('2d');
+                        var ctx = document.getElementById('myChart').getContext('2d');
                         myChart = new Chart(ctx, {
                             type: 'line',
                             data: {
