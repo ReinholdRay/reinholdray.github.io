@@ -22,6 +22,14 @@
     <input type="text" id="apiUrl" value="https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo">
     <button onclick="updateData()">Update Data</button>
     <br><br>
+    <label for="priceType">Select Price Type:</label>
+    <select id="priceType" onchange="updateData()">
+        <option value="1. open">Open</option>
+        <option value="2. high">High</option>
+        <option value="3. low">Low</option>
+        <option value="4. close" selected>Close</option>
+    </select>
+    <br><br>
     <textarea id="responseTextArea" rows="20" cols="80" readonly></textarea>
 
     <div style="width: 800px; margin: 20px auto;">
@@ -32,10 +40,12 @@
         'use strict';
         var apiUrlInput = document.getElementById('apiUrl');
         var responseTextArea = document.getElementById('responseTextArea');
+        var priceTypeSelect = document.getElementById('priceType');
         var myChart;
 
         function updateData() {
             var apiUrl = apiUrlInput.value;
+            var priceType = priceTypeSelect.value;
             var request = new XMLHttpRequest();
             request.open('GET', apiUrl, true);
             request.setRequestHeader('Content-Type', 'application/json');
@@ -50,12 +60,13 @@
                     // Update chart with new data
                     const dailyPrices = data['Time Series (Daily)'];
                     const dates = Object.keys(dailyPrices).reverse();
-                    const closingPrices = dates.map(date => parseFloat(dailyPrices[date]['4. close']));
+                    const prices = dates.map(date => parseFloat(dailyPrices[date][priceType]));
                     const labels = dates.map(date => new Date(date).toLocaleDateString('en-US'));
 
                     if (myChart) {
                         myChart.data.labels = labels;
-                        myChart.data.datasets[0].data = closingPrices;
+                        myChart.data.datasets[0].data = prices;
+                        myChart.options.plugins.title.text = `${priceType.split(' ')[1].toUpperCase()} Prices`;
                         myChart.update();
                     } else {
                         const ctx = document.getElementById('myChart').getContext('2d');
@@ -64,8 +75,8 @@
                             data: {
                                 labels: labels,
                                 datasets: [{
-                                    label: 'IBM Closing Prices',
-                                    data: closingPrices,
+                                    label: `${priceType.split(' ')[1].toUpperCase()} Prices`,
+                                    data: prices,
                                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                                     borderColor: 'rgba(54, 162, 235, 1)',
                                     borderWidth: 1
@@ -84,8 +95,14 @@
                                         display: true,
                                         title: {
                                             display: true,
-                                            text: 'Closing Price'
+                                            text: `${priceType.split(' ')[1].toUpperCase()} Price`
                                         }
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: `${priceType.split(' ')[1].toUpperCase()} Prices`
                                     }
                                 }
                             }
