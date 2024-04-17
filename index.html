@@ -27,8 +27,13 @@
 <body>
     <h1>Stock Data</h1>
     <label for="apiUrl">API URL:</label>
-    <input type="text" id="apiUrl" value="https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo">
+    <input type="text" id="apiUrl" value="https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=SPYI&apikey=UTJNXSGVUAKMED2F">
     <button onclick="updateData()">Update Data</button>
+    <br><br>
+    <text id="w3review" name="w3review" rows="4" cols="50">
+    Example API url: https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo
+    Actual Symbol: https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=SPYI&apikey=UTJNXSGVUAKMED2F
+    </textarea>    
     <br><br>
     <label for="priceType">Select Price Type:</label>
     <select id="priceType" onchange="updateData()">
@@ -125,7 +130,7 @@
                     if (myChart) {
                         myChart.data.labels = labels;
                         myChart.data.datasets[0].data = prices;
-                        myChart.options.plugins.title.text = `${priceType.split(' ')[1].toUpperCase()} Prices`;
+                        myChart.options.plugins.title.text = data["Meta Data"]["2. Symbol"]; // Update chart title here
                         myChart.update();
                     } else {
                         var ctx = document.getElementById('myChart').getContext('2d');
@@ -161,12 +166,13 @@
                                 plugins: {
                                     title: {
                                         display: true,
-                                        text: `${priceType.split(' ')[1].toUpperCase()} Prices`
+                                        text: data["Meta Data"]["2. Symbol"] // Set chart title here as well
                                     }
                                 }
                             }
                         });
                     }
+
 
                     // Calculate difference with most recent close
                     var mostRecentDate = dates[dates.length - 1];
